@@ -327,4 +327,18 @@ double FrontierSearch::frontierCost(const Frontier& frontier)
           costmap_->getResolution()) -
          (gain_scale_ * frontier.size * costmap_->getResolution());
 }
+
+//NOTE min_distance es la distancia a la frontera más cercana.
+//potential y gain son constantes y la resolución vamos a suponer que también
+//El original hace una escala de la que tenga a otra muy cerca y encima sea 
+//de tamaño pequeño
+
+//Con el que hemos creado queremos que priorice también las fronteras más cercanas
+double FrontierSearch::myfrontierCost(const Frontier& frontier)
+{
+  return (3 * dist * costmap_->getResolution()) + (potential_scale_ * frontier.min_distance *
+          costmap_->getResolution()) -
+         (gain_scale_ * frontier.size * costmap_->getResolution());
+}
+//NOTE
 }
