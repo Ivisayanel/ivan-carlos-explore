@@ -129,19 +129,26 @@ std::vector<Frontier> FrontierSearch::mySearchFrom(geometry_msgs::Point position
   // initialize breadth first search
   std::queue<unsigned int> gbfs; // NOTE Greedy Best First Search
 
+  std::priority_queue<pair <int, point>> pbfs;//NOTE mi propuesta de utilizar una priority query y poner de int heurística y al otro lado el punto.
+
   // find closest clear cell to start search
   unsigned int clear, pos = costmap_->getIndex(mx, my);
   if (nearestCell(clear, pos, FREE_SPACE, *costmap_)) {
     bfs.push(clear);
+    pbfs.push(make_pair(heuristic,clear)); //NOTE se rellena igual y faltaría añadir la heurística
   } else {
     bfs.push(pos);
+    pbfs.push(make_pair(heuristic,pos)); //NOTE igual que antes.
     ROS_WARN("Could not find nearby clear cell to start search");
   }
   visited_flag[bfs.front()] = true;
+  visited_flag[pbfs.front().second()] = true; //NOTE copiando lo antiguo pero con lo nuevo
 
   while (!bfs.empty()) {
     unsigned int idx = bfs.front();
     bfs.pop();
+    unsigned int idx = pbfs.front().second();
+    pbfs.pop();    
 
     // iterate over 4-connected neighbourhood
     for (unsigned nbr : nhood4(idx, *costmap_)) {
@@ -150,6 +157,7 @@ std::vector<Frontier> FrontierSearch::mySearchFrom(geometry_msgs::Point position
       if (map_[nbr] <= map_[idx] && !visited_flag[nbr]) {
         visited_flag[nbr] = true;
         bfs.push(nbr);
+        pbfs.push(nbr);//NOTE copiando...
         // check if cell is new frontier cell (unvisited, NO_INFORMATION, free
         // neighbour)
       } else if (isNewFrontierCell(nbr, frontier_flag)) {
@@ -163,7 +171,7 @@ std::vector<Frontier> FrontierSearch::mySearchFrom(geometry_msgs::Point position
     }
   }
 
-  // set costs of frontiers
+ 
   for (auto& frontier : frontier_list) {
     frontier.cost = frontierCost(frontier);
   }
@@ -242,6 +250,51 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
       }
     }
   }
+
+   //Note copiar el bucle anterior y modicarlo a lo nuestro.
+while (!pbfs.empty()) {
+    unsigned int idx = pbfs.front();
+    pbfs.pop();
+
+    // try adding cells in 8-connected neighborhood to frontier
+    for (unsigned int nbr : nhood8(idx, *costmap_)) {
+      // check if neighbour is a potential frontier cell
+      if (isNewFrontierCell(nbr, frontier_flag)) {
+        // mark cell as frontier
+        frontier_flag[nbr] = true;
+        unsigned int mx, my;
+        double wx, wy;
+        costmap_->indexToCells(nbr, mx, my);
+        costmap_->mapToWorld(mx, my, wx, wy);
+
+        geometry_msgs::Point point;
+        point.x = wx;
+        point.y = wy;
+        output.points.push_back(point);
+
+        // update frontier size
+        output.size++;
+
+        // update centroid of frontier
+        output.centroid.x += wx;
+        output.centroid.y += wy;
+
+        // determine frontier's distance from robot, going by closest gridcell
+        // to robot
+        double distance = sqrt(pow((double(reference_x) - double(wx)), 2.0) +
+                               pow((double(reference_y) - double(wy)), 2.0));
+        if (distance < output.min_distance) {
+          output.min_distance = distance;
+          output.middle.x = wx;
+          output.middle.y = wy;
+        }
+
+        // add to queue for breadth first search
+        bfs.push(nbr);
+      }
+    }
+  }
+  // set costs of frontiers
 
   // average out frontier centroid
   output.centroid.x /= output.size;
