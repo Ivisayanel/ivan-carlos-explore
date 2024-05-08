@@ -1,5 +1,9 @@
 
+//////////// a partir de la linea 175///////////////////
 
+for (auto& frontier : frontier_list) {
+    frontier.cost = myfrontierCost(frontier);
+  }
 
 
 ///////////de la línea 331 al final/////////////////////
