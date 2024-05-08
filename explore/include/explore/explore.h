@@ -100,6 +100,7 @@ private:
   std::vector<geometry_msgs::Point> frontier_blacklist_;
   geometry_msgs::Point prev_goal_;
   double prev_distance_;
+  bool same_goal_; // NOTE
   ros::Time last_progress_;
   size_t last_markers_count_;
 

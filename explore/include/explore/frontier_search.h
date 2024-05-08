@@ -2,6 +2,7 @@
 #define FRONTIER_SEARCH_H_
 
 #include <costmap_2d/costmap_2d.h>
+#include <pair>
 
 namespace frontier_exploration
 {
@@ -43,6 +44,17 @@ public:
    * @return List of frontiers, if any
    */
   std::vector<Frontier> searchFrom(geometry_msgs::Point position);
+
+  // NOTE Funcion propia
+  /**
+   * @brief Runs search implementation, best first search from previous state
+   * if it is following the same goal as before.
+   * @authors Ivan Sanchez, Carlos Perez
+   */
+  std::vector<Frontier> mySearchFrom(geometry_msgs::Point position,
+                                     bool same_goal,
+                                     geometry_msgs::Point prev_goal);
+  // NOTE
 
 protected:
   /**

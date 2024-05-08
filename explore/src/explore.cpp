@@ -57,6 +57,7 @@ Explore::Explore()
   , move_base_client_("move_base")
   , prev_distance_(0)
   , last_markers_count_(0)
+  , same_goal_(false) // NOTE
 {
   double timeout;
   double min_frontier_size;
@@ -181,7 +182,7 @@ void Explore::makePlan()
   // find frontiers
   auto pose = costmap_client_.getRobotPose();
   // get frontiers sorted according to cost
-  auto frontiers = search_.searchFrom(pose.position);
+  auto frontiers = search_.searchFrom(pose.position, same_goal_, prev_goal_); // NOTE
   ROS_DEBUG("found %lu frontiers", frontiers.size());
   for (size_t i = 0; i < frontiers.size(); ++i) {
     ROS_DEBUG("frontier %zd cost: %f", i, frontiers[i].cost);
@@ -203,16 +204,20 @@ void Explore::makePlan()
                        [this](const frontier_exploration::Frontier& f) {
                          return goalOnBlacklist(f.centroid);
                        });
-  if (frontier == frontiers.end()) {
+
+  // NOTE
+  // Si es same goal solo devolveria una unica frontier que seria la anterior
+  // o todas las posibles, en caso de no encontrarla el empty de antes saltaria
+  if (!same_goal_ && frontier == frontiers.end()) {
     stop();
     return;
   }
   geometry_msgs::Point target_position = frontier->centroid;
 
   // time out if we are not making any progress
-  bool same_goal = prev_goal_ == target_position;
+  same_goal_ = prev_goal_ == target_position; // NOTE
   prev_goal_ = target_position;
-  if (!same_goal || prev_distance_ > frontier->min_distance) {
+  if (!same_goal_ || prev_distance_ > frontier->min_distance) {
     // we have different goal or we made some progress
     last_progress_ = ros::Time::now();
     prev_distance_ = frontier->min_distance;
@@ -226,7 +231,7 @@ void Explore::makePlan()
   }
 
   // we don't need to do anything if we still pursuing the same goal
-  if (same_goal) {
+  if (same_goal_) {
     return;
   }
 
