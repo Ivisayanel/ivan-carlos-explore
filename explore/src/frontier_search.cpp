@@ -302,18 +302,5 @@ double FrontierSearch::frontierCost(const Frontier& frontier)
 //potential y gain son constantes y la resolución vamos a suponer que también
 //El original hace una escala de la que tenga a otra muy cerca y encima sea
 //de tamaño pequeño
-
-//Con el que hemos creado queremos que priorice también las fronteras más cercanas
-double FrontierSearch::myFrontierCost(const Frontier& frontier,
-                                      geometry_msgs::Point robot_pose)
-{
-  auto fpoint = frontier.centroid;
-  float dist = sqrt((robot_pose.x - fpoint.x) * (robot_pose.x - fpoint.x) +
-                     (robot_pose.y - fpoint.y) * (robot_pose.y - fpoint.y));
-  return (0.8 * dist * costmap_->getResolution())
-          + (potential_scale_ * frontier.min_distance * costmap_->getResolution())
-          - (gain_scale_ * frontier.size * costmap_->getResolution());
-}
-
 } // END namespace
 //NOTE
