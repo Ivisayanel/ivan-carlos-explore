@@ -102,6 +102,8 @@ std::vector<Frontier> FrontierSearch::mySearchFrom(geometry_msgs::Point position
   if (!same_goal)
     return this->searchFrom(position);
 
+  ROS_INFO("Doing Best First Search");
+
   // Si es el mateix goal que abans fes la cerca amb best first search cap alla
   // te la jugues pero en teoria hauria de ser accesible, molt mes eficient
   // simplement buscar on esta ara o mirar si es accesible amb Best Frist
@@ -189,7 +191,7 @@ std::vector<Frontier> FrontierSearch::mySearchFrom(geometry_msgs::Point position
   }
 
   for (auto& frontier : frontier_list) {
-    frontier.cost = myFrontierCost(frontier, position);
+    frontier.cost = frontierCost(frontier);
   }
 
   return frontier_list;

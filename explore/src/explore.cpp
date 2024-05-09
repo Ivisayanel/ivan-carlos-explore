@@ -208,7 +208,7 @@ void Explore::makePlan()
   // NOTE
   // Si es same goal solo devolveria una unica frontier que seria la anterior
   // o todas las posibles, en caso de no encontrarla el empty de antes saltaria
-  if (!same_goal_ && frontier == frontiers.end()) {
+  if (frontier == frontiers.end()) {
     stop();
     return;
   }
@@ -216,6 +216,8 @@ void Explore::makePlan()
 
   // time out if we are not making any progress
   same_goal_ = prev_goal_ == target_position; // NOTE
+  if (same_goal_)
+    ROS_INFO("Seguim el mateix goal");
   prev_goal_ = target_position;
   if (!same_goal_ || prev_distance_ > frontier->min_distance) {
     // we have different goal or we made some progress
