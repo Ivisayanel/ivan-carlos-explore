@@ -33,4 +33,5 @@ COPYRIGHT
 Packages are licensed under BSD license. See respective files for details.
 
 Solo se han modificado unos ficheros respecto a la exploración del explore_lite original.
+
 Github original: https://github.com/hrnr/m-explore.git
