@@ -15,13 +15,12 @@ for (auto& frontier : frontier_list) {
 //Con el que hemos creado queremos que priorice también las fronteras más cercanas
 double FrontierSearch::myfrontierCost(const Frontier& frontier)
 {
-  Costmap2DClient costmap_client_;
   auto pose = costmap_client_.getRobotPose();
-  auto fpoint = frontier.inital();
+  auto fpoint = frontier.centroid();
   float dist = sqrt((pose.x - fpoint.x) * (pose.x - fpoint.x) +
                      (pose.y - fpoint.y) * (pose.y - fpoint.y));
-  return (3 * dist * costmap_->getResolution()) + (potential_scale_ * frontier.min_distance *
-          costmap_->getResolution()) -
-         (gain_scale_ * frontier.size * costmap_->getResolution());
+  return (3 * dist * costmap_->getResolution())
+          + (potential_scale_ * frontier.min_distance * costmap_->getResolution())
+          - (gain_scale_ * frontier.size * costmap_->getResolution());
 }
 //NOTE

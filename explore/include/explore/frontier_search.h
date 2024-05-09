@@ -2,7 +2,8 @@
 #define FRONTIER_SEARCH_H_
 
 #include <costmap_2d/costmap_2d.h>
-#include <pair>
+#include <utility>
+#include <cmath>
 
 namespace frontier_exploration
 {
@@ -88,6 +89,10 @@ protected:
    * @return cost of the frontier
    */
   double frontierCost(const Frontier& frontier);
+
+  // NOTE
+  double myFrontierCost(const Frontier& frontier, geometry_msgs::Point robot_pose);
+
 
 private:
   costmap_2d::Costmap2D* costmap_;
